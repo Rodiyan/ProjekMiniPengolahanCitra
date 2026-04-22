@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Histogram Spesifikasi RGB</title>
+  <style>
+    :root {
+      --bg: #eef4ff;
+      --card: rgba(255, 255, 255, 0.96);
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --secondary: #0ea5e9;
+      --border: #dbe4f0;
+      --shadow: 0 12px 32px rgba(37, 99, 235, 0.12);
+      --red: #ef4444;
+      --green: #22c55e;
+      --blue: #3b82f6;
+      --warning-bg: #fff7ed;
+      --warning-text: #9a3412;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #dbeafe 0%, transparent 28%),
+        radial-gradient(circle at top right, #e0e7ff 0%, transparent 22%),
+        linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1380px, calc(100% - 32px));
+      margin: 28px auto 40px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+      color: white;
+      border-radius: 24px;
+      padding: 28px 26px;
+      box-shadow: 0 14px 40px rgba(37, 99, 235, 0.25);
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+
+    .card p.small {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: white;
+      font-size: 14px;
+    }
+
+    .button-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.28);
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.32);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    }
+
+    .warning {
+      display: none;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border-left: 5px solid #f97316;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .panel {
+      position: relative;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      text-align: center;
+      margin: 2px 0 14px;
+      font-size: 22px;
+    }
+
+    canvas.imageCanvas {
+      width: 100%;
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    canvas.histCanvas {
+      width: 100%;
+      height: 340px;
+      display: block;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+      cursor: crosshair;
+    }
+
+    .section {
+      display: none;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .section.show {
+      display: block;
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: 24px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .summary-card {
+      background: #f9fbff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      border: 1px solid #d9e7ff;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .mini-table th {
+      background: #edf4ff;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      border-left: 5px solid var(--primary);
+      border-radius: 14px;
+      padding: 14px 16px;
+      line-height: 1.7;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      z-index: 999;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    .modal.show {
+      display: block;
+    }
+
+    .modal-content {
+      width: min(1400px, 100%);
+      margin: 18px auto;
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.2);
+      box-shadow: none;
+      padding: 10px 14px;
+    }
+
+    .close-btn:hover {
+      box-shadow: none;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 520px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+    }
+
+    .detail-table {
+      width: 100%;
+      min-width: 1600px;
+      border-collapse: collapse;
+    }
+
+    .detail-table th,
+    .detail-table td {
+      border: 1px solid #e5edf7;
+      padding: 8px 7px;
+      text-align: center;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .detail-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #eef5ff;
+    }
+
+    .detail-table tbody tr:nth-child(even) {
+      background: #fbfdff;
+    }
+
+    .modal-footer {
+      padding: 18px 20px 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #e5edf7;
+    }
+
+    .status-text {
+      color: #475569;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .hist-tooltip {
+      position: fixed;
+      z-index: 2000;
+      pointer-events: none;
+      display: none;
+      min-width: 150px;
+      background: rgba(15, 23, 42, 0.95);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hist-tooltip .title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #f8fafc;
+    }
+
+    .hist-tooltip .r { color: #f87171; }
+    .hist-tooltip .g { color: #4ade80; }
+    .hist-tooltip .b { color: #60a5fa; }
+
+    .badge-r { color: #ef4444; font-weight: 700; }
+    .badge-g { color: #22c55e; font-weight: 700; }
+    .badge-b { color: #3b82f6; font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 24px;
+      }
+
+      .panel h2,
+      .section h2,
+      .modal-header h2 {
+        font-size: 20px;
+      }
+
+      canvas.histCanvas {
+        height: 300px;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Histogram Spesifikasi RGB</h1>
+    </div>
+
+    <div class="controls">
+      <div class="card">
+        <h3>Upload Citra Asli</h3>
+        <p class="small">Pilih gambar sumber yang akan disesuaikan histogramnya.</p>
+        <input type="file" id="sourceInput" accept="image/*" />
+      </div>
+
+      <div class="card">
+        <h3>Upload Citra Target</h3>
+        <p class="small">Pilih gambar target sebagai acuan histogram spesifikasi.</p>
+        <input type="file" id="targetInput" accept="image/*" />
+      </div>
+
+      <div class="card button-col">
+        <h3>Proses</h3>
+        <p class="small">Klik proses setelah kedua gambar dipilih.</p>
+        <button id="processBtn" disabled>Proses Histogram Spesifikasi</button>
+        <button id="showCalcBtn" class="secondary-btn" disabled>Lihat Perhitungan</button>
+      </div>
+    </div>
+
+    <div id="sameFileWarning" class="warning">
+      Citra asli dan target terlihat sama. Gunakan dua gambar berbeda agar hasil lebih jelas.
+    </div>
+
+    <div class="image-grid">
+      <div class="panel">
+        <h2>Citra Asli</h2>
+        <canvas id="sourceCanvas" class="imageCanvas"></canvas>
+        <canvas id="sourceHist" class="histCanvas" width="760" height="340"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Citra Target</h2>
+        <canvas id="targetCanvas" class="imageCanvas"></canvas>
+        <canvas id="targetHist" class="histCanvas" width="760" height="340"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Output</h2>
+        <canvas id="outputCanvas" class="imageCanvas"></canvas>
+        <canvas id="outputHist" class="histCanvas" width="760" height="340"></canvas>
+      </div>
+    </div>
+
+    <div id="summarySection" class="section">
+      <h2>Ringkasan Penjumlahan Histogram</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <h3>Citra Asli</h3>
+          <table class="mini-table" id="sourceSummaryTable">
+            <thead>
+              <tr><th>Data</th><th>Nilai</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Piksel</td><td>-</td></tr>
+              <tr><td>Σ Histogram R</td><td>-</td></tr>
+              <tr><td>Σ Histogram G</td><td>-</td></tr>
+              <tr><td>Σ Histogram B</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="summary-card">
+          <h3>Citra Target</h3>
+          <table class="mini-table" id="targetSummaryTable">
+            <thead>
+              <tr><th>Data</th><th>Nilai</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Piksel</td><td>-</td></tr>
+              <tr><td>Σ Histogram R</td><td>-</td></tr>
+              <tr><td>Σ Histogram G</td><td>-</td></tr>
+              <tr><td>Σ Histogram B</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="summary-card">
+          <h3>Citra Output</h3>
+          <table class="mini-table" id="outputSummaryTable">
+            <thead>
+              <tr><th>Data</th><th>Nilai</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Total Piksel</td><td>-</td></tr>
+              <tr><td>Σ Histogram R</td><td>-</td></tr>
+              <tr><td>Σ Histogram G</td><td>-</td></tr>
+              <tr><td>Σ Histogram B</td><td>-</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        
+        <b></b>
+      </div>
+    </div>
+  </div>
+
+  <div id="calcModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Proses Perhitungan Histogram Spesifikasi</h2>
+        <button id="closeModalBtn" class="close-btn">Tutup</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="table-wrap">
+          <table class="detail-table" id="detailsTable">
+            <thead>
+              <tr>
+                <th rowspan="2">Intensitas</th>
+                <th colspan="5">Red (R)</th>
+                <th colspan="5">Green (G)</th>
+                <th colspan="5">Blue (B)</th>
+              </tr>
+              <tr>
+                <th>Hist Sumber</th>
+                <th>Hist Target</th>
+                <th>CDF Sumber</th>
+                <th>CDF Target</th>
+                <th>Map</th>
+
+                <th>Hist Sumber</th>
+                <th>Hist Target</th>
+                <th>CDF Sumber</th>
+                <th>CDF Target</th>
+                <th>Map</th>
+
+                <th>Hist Sumber</th>
+                <th>Hist Target</th>
+                <th>CDF Sumber</th>
+                <th>CDF Target</th>
+                <th>Map</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div id="tableStatus" class="status-text">Menampilkan 0 dari 256 baris</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <button id="extendBtn" class="secondary-btn">Extend +6</button>
+          <button id="showAllBtn">Tampilkan Semua</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="histTooltip" class="hist-tooltip"></div>
+
+  <script>
+    const sourceInput = document.getElementById("sourceInput");
+    const targetInput = document.getElementById("targetInput");
+    const processBtn = document.getElementById("processBtn");
+    const showCalcBtn = document.getElementById("showCalcBtn");
+    const sameFileWarning = document.getElementById("sameFileWarning");
+
+    const sourceCanvas = document.getElementById("sourceCanvas");
+    const targetCanvas = document.getElementById("targetCanvas");
+    const outputCanvas = document.getElementById("outputCanvas");
+
+    const sourceCtx = sourceCanvas.getContext("2d");
+    const targetCtx = targetCanvas.getContext("2d");
+    const outputCtx = outputCanvas.getContext("2d");
+
+    const sourceHistCanvas = document.getElementById("sourceHist");
+    const targetHistCanvas = document.getElementById("targetHist");
+    const outputHistCanvas = document.getElementById("outputHist");
+
+    const sourceSummaryTable = document.getElementById("sourceSummaryTable");
+    const targetSummaryTable = document.getElementById("targetSummaryTable");
+    const outputSummaryTable = document.getElementById("outputSummaryTable");
+    const summarySection = document.getElementById("summarySection");
+
+    const calcModal = document.getElementById("calcModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const extendBtn = document.getElementById("extendBtn");
+    const showAllBtn = document.getElementById("showAllBtn");
+    const detailsTableBody = document.querySelector("#detailsTable tbody");
+    const tableStatus = document.getElementById("tableStatus");
+    const histTooltip = document.getElementById("histTooltip");
+
+    let sourceLoaded = false;
+    let targetLoaded = false;
+    let sourceFileName = "";
+    let targetFileName = "";
+
+    let calculationRows = [];
+    let visibleRowCount = 0;
+    const stepRows = 6;
+    let hasProcessed = false;
+
+    const histogramStore = new Map();
+
+    function updateButtonState() {
+      processBtn.disabled = !(sourceLoaded && targetLoaded);
+
+      if (sourceFileName && targetFileName && sourceFileName === targetFileName) {
+        sameFileWarning.style.display = "block";
+      } else {
+        sameFileWarning.style.display = "none";
+      }
+    }
+
+    function resetCalculationView() {
+      hasProcessed = false;
+      showCalcBtn.disabled = true;
+      summarySection.classList.remove("show");
+      calcModal.classList.remove("show");
+      calculationRows = [];
+      visibleRowCount = 0;
+      detailsTableBody.innerHTML = "";
+      tableStatus.textContent = "Menampilkan 0 dari 256 baris";
+      hideTooltip();
+    }
+
+    function loadImageToCanvas(file, canvas, ctx, callback) {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        img.onload = function() {
+          const maxWidth = 520;
+          const scale = Math.min(1, maxWidth / img.width);
+          const width = Math.round(img.width * scale);
+          const height = Math.round(img.height * scale);
+
+          canvas.width = width;
+          canvas.height = height;
+          canvas.style.height = height + "px";
+
+          ctx.clearRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          callback();
+        };
+        img.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    sourceInput.addEventListener("change", function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      sourceFileName = file.name;
+      resetCalculationView();
+
+      loadImageToCanvas(file, sourceCanvas, sourceCtx, () => {
+        sourceLoaded = true;
+        const imageData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+        const hist = computeRGBHistogram(imageData.data);
+        drawRGBHistogram(sourceHistCanvas, hist, "Histogram Citra Asli");
+        updateButtonState();
+      });
+    });
+
+    targetInput.addEventListener("change", function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      targetFileName = file.name;
+      resetCalculationView();
+
+      loadImageToCanvas(file, targetCanvas, targetCtx, () => {
+        targetLoaded = true;
+        const imageData = targetCtx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
+        const hist = computeRGBHistogram(imageData.data);
+        drawRGBHistogram(targetHistCanvas, hist, "Histogram Citra Target");
+        updateButtonState();
+      });
+    });
+
+    processBtn.addEventListener("click", function() {
+      const sourceData = sourceCtx.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+      const targetData = targetCtx.getImageData(0, 0, targetCanvas.width, targetCanvas.height);
+
+      const sourceHist = computeRGBHistogram(sourceData.data);
+      const targetHist = computeRGBHistogram(targetData.data);
+
+      const totalSourcePixels = sourceCanvas.width * sourceCanvas.height;
+      const totalTargetPixels = targetCanvas.width * targetCanvas.height;
+
+      const sourceCDF = {
+        r: computeCDF(sourceHist.r, totalSourcePixels),
+        g: computeCDF(sourceHist.g, totalSourcePixels),
+        b: computeCDF(sourceHist.b, totalSourcePixels)
+      };
+
+      const targetCDF = {
+        r: computeCDF(targetHist.r, totalTargetPixels),
+        g: computeCDF(targetHist.g, totalTargetPixels),
+        b: computeCDF(targetHist.b, totalTargetPixels)
+      };
+
+      const mapR = buildHistogramSpecificationMap(sourceCDF.r, targetCDF.r);
+      const mapG = buildHistogramSpecificationMap(sourceCDF.g, targetCDF.g);
+      const mapB = buildHistogramSpecificationMap(sourceCDF.b, targetCDF.b);
+
+      const outputData = applyRGBMapping(sourceData, mapR, mapG, mapB);
+
+      outputCanvas.width = sourceCanvas.width;
+      outputCanvas.height = sourceCanvas.height;
+      outputCanvas.style.height = sourceCanvas.height + "px";
+      outputCtx.putImageData(outputData, 0, 0);
+
+      const outputHist = computeRGBHistogram(outputData.data);
+      drawRGBHistogram(outputHistCanvas, outputHist, "Histogram Output");
+
+      updateSummaryTable(sourceSummaryTable, totalSourcePixels, sourceHist);
+      updateSummaryTable(targetSummaryTable, totalTargetPixels, targetHist);
+      updateSummaryTable(outputSummaryTable, outputCanvas.width * outputCanvas.height, outputHist);
+
+      calculationRows = buildCalculationRows(sourceHist, targetHist, sourceCDF, targetCDF, mapR, mapG, mapB);
+      visibleRowCount = 6;
+      hasProcessed = true;
+      showCalcBtn.disabled = false;
+    });
+
+    showCalcBtn.addEventListener("click", function() {
+      if (!hasProcessed || calculationRows.length === 0) return;
+
+      summarySection.classList.add("show");
+      renderCalculationTable();
+      calcModal.classList.add("show");
+    });
+
+    closeModalBtn.addEventListener("click", function() {
+      calcModal.classList.remove("show");
+    });
+
+    calcModal.addEventListener("click", function(e) {
+      if (e.target === calcModal) {
+        calcModal.classList.remove("show");
+      }
+    });
+
+    extendBtn.addEventListener("click", function() {
+      visibleRowCount = Math.min(visibleRowCount + stepRows, calculationRows.length);
+      renderCalculationTable();
+    });
+
+    showAllBtn.addEventListener("click", function() {
+      visibleRowCount = calculationRows.length;
+      renderCalculationTable();
+    });
+
+    function computeRGBHistogram(data) {
+      const histR = new Array(256).fill(0);
+      const histG = new Array(256).fill(0);
+      const histB = new Array(256).fill(0);
+
+      for (let i = 0; i < data.length; i += 4) {
+        histR[data[i]]++;
+        histG[data[i + 1]]++;
+        histB[data[i + 2]]++;
+      }
+
+      return { r: histR, g: histG, b: histB };
+    }
+
+    function computeCDF(hist, totalPixels) {
+      const cdf = new Array(256).fill(0);
+      let cumulative = 0;
+
+      for (let i = 0; i < 256; i++) {
+        cumulative += hist[i];
+        cdf[i] = cumulative / totalPixels;
+      }
+
+      return cdf;
+    }
+
+    function buildHistogramSpecificationMap(sourceCDF, targetCDF) {
+      const map = new Array(256).fill(0);
+
+      for (let i = 0; i < 256; i++) {
+        let minDiff = Infinity;
+        let bestMatch = 0;
+
+        for (let j = 0; j < 256; j++) {
+          const diff = Math.abs(sourceCDF[i] - targetCDF[j]);
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestMatch = j;
+          }
+        }
+
+        map[i] = bestMatch;
+      }
+
+      return map;
+    }
+
+    function applyRGBMapping(imageData, mapR, mapG, mapB) {
+      const src = imageData.data;
+      const output = new ImageData(imageData.width, imageData.height);
+      const dst = output.data;
+
+      for (let i = 0; i < src.length; i += 4) {
+        dst[i] = mapR[src[i]];
+        dst[i + 1] = mapG[src[i + 1]];
+        dst[i + 2] = mapB[src[i + 2]];
+        dst[i + 3] = src[i + 3];
+      }
+
+      return output;
+    }
+
+    function sumArray(arr) {
+      return arr.reduce((sum, val) => sum + val, 0);
+    }
+
+    function updateSummaryTable(table, totalPixels, hist) {
+      const rows = table.querySelectorAll("tbody tr");
+      rows[0].children[1].textContent = totalPixels;
+      rows[1].children[1].textContent = sumArray(hist.r);
+      rows[2].children[1].textContent = sumArray(hist.g);
+      rows[3].children[1].textContent = sumArray(hist.b);
+    }
+
+    function buildCalculationRows(sourceHist, targetHist, sourceCDF, targetCDF, mapR, mapG, mapB) {
+      const rows = [];
+
+      for (let i = 0; i < 256; i++) {
+        rows.push({
+          intensity: i,
+          sr: sourceHist.r[i],
+          tr: targetHist.r[i],
+          cdfsr: sourceCDF.r[i].toFixed(6),
+          cdftr: targetCDF.r[i].toFixed(6),
+          mapr: mapR[i],
+
+          sg: sourceHist.g[i],
+          tg: targetHist.g[i],
+          cdfsg: sourceCDF.g[i].toFixed(6),
+          cdftg: targetCDF.g[i].toFixed(6),
+          mapg: mapG[i],
+
+          sb: sourceHist.b[i],
+          tb: targetHist.b[i],
+          cdfsb: sourceCDF.b[i].toFixed(6),
+          cdftb: targetCDF.b[i].toFixed(6),
+          mapb: mapB[i]
+        });
+      }
+
+      return rows;
+    }
+
+    function renderCalculationTable() {
+      detailsTableBody.innerHTML = "";
+
+      const rowsToShow = calculationRows.slice(0, visibleRowCount);
+
+      rowsToShow.forEach(row => {
+        const tr = document.createElement("tr");
+        const values = [
+          row.intensity,
+
+          row.sr, row.tr, row.cdfsr, row.cdftr, row.mapr,
+          row.sg, row.tg, row.cdfsg, row.cdftg, row.mapg,
+          row.sb, row.tb, row.cdfsb, row.cdftb, row.mapb
+        ];
+
+        values.forEach(value => {
+          const td = document.createElement("td");
+          td.textContent = value;
+          tr.appendChild(td);
+        });
+
+        detailsTableBody.appendChild(tr);
+      });
+
+      tableStatus.textContent = `Menampilkan ${visibleRowCount} dari ${calculationRows.length} baris`;
+      extendBtn.disabled = visibleRowCount >= calculationRows.length;
+    }
+
+    function smoothHistogram(data, radius = 1) {
+      const result = new Array(data.length).fill(0);
+
+      for (let i = 0; i < data.length; i++) {
+        let sum = 0;
+        let count = 0;
+
+        for (let j = i - radius; j <= i + radius; j++) {
+          if (j >= 0 && j < data.length) {
+            sum += data[j];
+            count++;
+          }
+        }
+
+        result[i] = sum / count;
+      }
+
+      return result;
+    }
+
+    function drawRGBHistogram(canvas, hist, title = "") {
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      const margin = {
+        top: 42,
+        right: 20,
+        bottom: 44,
+        left: 62
+      };
+
+      const chartWidth = width - margin.left - margin.right;
+      const chartHeight = height - margin.top - margin.bottom;
+
+      const smoothR = smoothHistogram(hist.r, 1);
+      const smoothG = smoothHistogram(hist.g, 1);
+      const smoothB = smoothHistogram(hist.b, 1);
+
+      const maxVal = Math.max(...smoothR, ...smoothG, ...smoothB, 1);
+
+      histogramStore.set(canvas.id, {
+        rawHist: hist,
+        smoothHist: { r: smoothR, g: smoothG, b: smoothB },
+        margin,
+        chartWidth,
+        chartHeight,
+        width,
+        height,
+        maxVal,
+        title
+      });
+
+      ctx.fillStyle = "#f8fbff";
+      ctx.fillRect(margin.left, margin.top, chartWidth, chartHeight);
+
+      ctx.fillStyle = "#111827";
+      ctx.font = "bold 16px Segoe UI";
+      ctx.textAlign = "center";
+      ctx.fillText(title, width / 2, 26);
+
+      ctx.strokeStyle = "#e3ebf6";
+      ctx.lineWidth = 1;
+      ctx.font = "11px Segoe UI";
+      ctx.fillStyle = "#64748b";
+      ctx.textAlign = "right";
+
+      const hLines = 5;
+      for (let i = 0; i <= hLines; i++) {
+        const y = margin.top + (i / hLines) * chartHeight;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left + chartWidth, y);
+        ctx.stroke();
+
+        const label = Math.round(maxVal * (1 - i / hLines));
+        ctx.fillText(label, margin.left - 8, y + 4);
+      }
+
+      ctx.textAlign = "center";
+      const vLines = 8;
+      for (let i = 0; i <= vLines; i++) {
+        const x = margin.left + (i / vLines) * chartWidth;
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, margin.top + chartHeight);
+        ctx.stroke();
+
+        const label = Math.round((i / vLines) * 255);
+        ctx.fillText(label, x, margin.top + chartHeight + 18);
+      }
+
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, margin.top + chartHeight);
+      ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
+      ctx.stroke();
+
+      ctx.fillStyle = "#374151";
+      ctx.font = "12px Segoe UI";
+      ctx.textAlign = "center";
+      ctx.fillText("Intensitas Piksel", margin.left + chartWidth / 2, height - 10);
+
+      ctx.save();
+      ctx.translate(20, margin.top + chartHeight / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("Frekuensi", 0, 0);
+      ctx.restore();
+
+      function drawChannel(data, color) {
+        ctx.beginPath();
+        for (let i = 0; i < 256; i++) {
+          const x = margin.left + (i / 255) * chartWidth;
+          const y = margin.top + chartHeight - (data[i] / maxVal) * chartHeight;
+
+          if (i === 0) {
+            ctx.moveTo(x, margin.top + chartHeight);
+            ctx.lineTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.lineTo(margin.left + chartWidth, margin.top + chartHeight);
+        ctx.closePath();
+
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+
+        ctx.beginPath();
+        for (let i = 0; i < 256; i++) {
+          const x = margin.left + (i / 255) * chartWidth;
+          const y = margin.top + chartHeight - (data[i] / maxVal) * chartHeight;
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+      }
+
+      drawChannel(smoothR, "#ef4444");
+      drawChannel(smoothG, "#22c55e");
+      drawChannel(smoothB, "#3b82f6");
+
+      const legendX = margin.left + 12;
+      const legendY = margin.top - 16;
+      const gap = 94;
+
+      const legends = [
+        { label: "Red", color: "#ef4444" },
+        { label: "Green", color: "#22c55e" },
+        { label: "Blue", color: "#3b82f6" }
+      ];
+
+      ctx.font = "12px Segoe UI";
+      ctx.textAlign = "left";
+
+      legends.forEach((item, index) => {
+        const x = legendX + index * gap;
+        ctx.fillStyle = item.color;
+        ctx.fillRect(x, legendY - 8, 14, 14);
+        ctx.fillStyle = "#111827";
+        ctx.fillText(item.label, x + 20, legendY + 3);
+      });
+    }
+
+    function setupHistogramTooltip(canvas) {
+      canvas.addEventListener("mousemove", function(e) {
+        const histData = histogramStore.get(canvas.id);
+        if (!histData) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        const { margin, chartWidth, chartHeight, rawHist } = histData;
+
+        const insideChart =
+          mouseX >= margin.left &&
+          mouseX <= margin.left + chartWidth &&
+          mouseY >= margin.top &&
+          mouseY <= margin.top + chartHeight;
+
+        if (!insideChart) {
+          hideTooltip();
+          redrawHistogramWithGuide(canvas, null);
+          return;
+        }
+
+        let intensity = Math.round(((mouseX - margin.left) / chartWidth) * 255);
+        intensity = Math.max(0, Math.min(255, intensity));
+
+        showTooltip(e.clientX, e.clientY, intensity, rawHist);
+        redrawHistogramWithGuide(canvas, intensity);
+      });
+
+      canvas.addEventListener("mouseleave", function() {
+        hideTooltip();
+        redrawHistogramWithGuide(canvas, null);
+      });
+    }
+
+    function showTooltip(clientX, clientY, intensity, hist) {
+      histTooltip.style.display = "block";
+      histTooltip.innerHTML = `
+        <div class="title">Intensitas: ${intensity}</div>
+        <div class="r">Red: ${hist.r[intensity]}</div>
+        <div class="g">Green: ${hist.g[intensity]}</div>
+        <div class="b">Blue: ${hist.b[intensity]}</div>
+      `;
+
+      const offsetX = 16;
+      const offsetY = 16;
+      let left = clientX + offsetX;
+      let top = clientY + offsetY;
+
+      const ttRect = histTooltip.getBoundingClientRect();
+      if (left + ttRect.width > window.innerWidth - 10) {
+        left = clientX - ttRect.width - 12;
+      }
+      if (top + ttRect.height > window.innerHeight - 10) {
+        top = clientY - ttRect.height - 12;
+      }
+
+      histTooltip.style.left = left + "px";
+      histTooltip.style.top = top + "px";
+    }
+
+    function hideTooltip() {
+      histTooltip.style.display = "none";
+    }
+
+    function redrawHistogramWithGuide(canvas, intensity) {
+      const histData = histogramStore.get(canvas.id);
+      if (!histData) return;
+
+      drawRGBHistogram(canvas, histData.rawHist, histData.title);
+
+      if (intensity === null || intensity === undefined) return;
+
+      const ctx = canvas.getContext("2d");
+      const { margin, chartWidth, chartHeight } = histogramStore.get(canvas.id);
+
+      const x = margin.left + (intensity / 255) * chartWidth;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.55)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, margin.top);
+      ctx.lineTo(x, margin.top + chartHeight);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    setupHistogramTooltip(sourceHistCanvas);
+    setupHistogramTooltip(targetHistCanvas);
+    setupHistogramTooltip(outputHistCanvas);
+  </script>
+</body>
+</html>
